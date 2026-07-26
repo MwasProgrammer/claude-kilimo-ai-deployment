@@ -18,19 +18,13 @@ const allowedOrigins = [
   process.env.CLIENT_ORIGIN,
 ].filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, Postman)
-      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.some(o => origin.endsWith('.vercel.app'))) {
-        callback(null, true);
-      } else {
-        callback(null, true); // Permissive CORS for public API demo
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://claude-kilimo-ai-deployment.vercel.app"
+    ],
+    credentials: true
+}));
 
 app.use(express.json());
 
