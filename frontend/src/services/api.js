@@ -4,17 +4,20 @@ const BASE_URL = normalizeBaseUrl(rawBaseUrl);
 function normalizeBaseUrl(url) {
   const trimmed = String(url || "").trim();
   if (!trimmed) {
-    return "";
+    return "http://localhost:4000/api";
   }
 
-  let normalized = trimmed;
-  if (normalized.startsWith("https:/") && !normalized.startsWith("https://")) {
-    normalized = `https://${normalized.slice(7)}`;
-  } else if (normalized.startsWith("http:/") && !normalized.startsWith("http://")) {
-    normalized = `http://${normalized.slice(6)}`;
-  }
+  let normalized = trimmed.replace(/^\/?VITE_API_BASE_URL=/, "");
+  normalized = normalized.replace(/^(https?:)\/+/, "$1//");
+  normalized = normalized.replace(/\/+$/, "");
 
-  return normalized.replace(/\/+$/, "");
+  try {
+    const parsed = new URL(normalized);
+    return parsed.href.replace(/\/+$/, "");
+  } catch (error) {
+    console.warn("Invalid VITE_API_BASE_URL; falling back to default:", normalized, error.message);
+    return "http://localhost:4000/api";
+  }
 }
 
 async function request(path, options = {}) {
