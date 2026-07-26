@@ -18,14 +18,21 @@ const allowedOrigins = [
   process.env.CLIENT_ORIGIN,
 ].filter(Boolean);
 
-app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://claude-kilimo-ai-deployment.vercel.app"
-    ],
-    credentials: true
-}));
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow server-to-server requests (no Origin header)
+      if (!origin) return callback(null, true);
 
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Generous rate limit to protect API budget and Nominatim
