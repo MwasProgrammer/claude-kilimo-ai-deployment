@@ -1,7 +1,25 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
+const BASE_URL = normalizeBaseUrl(rawBaseUrl);
+
+function normalizeBaseUrl(url) {
+  const trimmed = String(url || "").trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  let normalized = trimmed;
+  if (normalized.startsWith("https:/") && !normalized.startsWith("https://")) {
+    normalized = `https://${normalized.slice(7)}`;
+  } else if (normalized.startsWith("http:/") && !normalized.startsWith("http://")) {
+    normalized = `http://${normalized.slice(6)}`;
+  }
+
+  return normalized.replace(/\/+$/, "");
+}
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const resolvedPath = path.startsWith("/") ? path : `/${path}`;
+  const res = await fetch(`${BASE_URL}${resolvedPath}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
   });
